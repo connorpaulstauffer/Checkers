@@ -1,3 +1,5 @@
+require 'colorize'
+
 class Piece
 
   attr_reader :color, :pos
@@ -16,7 +18,7 @@ class Piece
   end
 
   def to_s
-    (color == :red) ? "\u25C9".red : "\u25C9".black
+    (color == :red) ? " #{"\u25C9".red} " : " #{"\u25C9".black} "
   end
 
 end
@@ -29,6 +31,10 @@ class EmptySquare
 
   def piece?
     false
+  end
+
+  def to_s
+    "   "
   end
 
 end
