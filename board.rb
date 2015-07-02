@@ -56,6 +56,30 @@ class Board
     end.join("\n")
   end
 
+  def cursor_up
+    if cursor_pos && cursor_pos.first > 0
+      @cursor_pos = [cursor_pos.first - 1, cursor_pos.last]
+    end
+  end
+
+  def cursor_down
+    if cursor_pos && cursor_pos.first < 7
+      @cursor_pos = [cursor_pos.first + 1, cursor_pos.last]
+    end
+  end
+
+  def cursor_left
+    if cursor_pos && cursor_pos.last > 0
+      @cursor_pos = [cursor_pos.first, cursor_pos.last - 1]
+    end
+  end
+
+  def cursor_right
+    if cursor_pos && cursor_pos.last < 7
+      @cursor_pos = [cursor_pos.first, cursor_pos.last + 1]
+    end
+  end
+
   def inspect
     nil
   end
