@@ -1,24 +1,28 @@
 require_relative 'board'
 require_relative 'player'
+require_relative 'display'
 
 class CheckersGame
-  attr_reader :board, :players
+  attr_reader :board, :players, :display
 
-  def initialize(players)
-    @board = Board.new
-    @board.game = self
-    @players = players
-    players.each do |player|
-      player.board = board
-      player.game = self
-    end
+  def initialize
+    @board = Board.new(self)
+    @display = Display.new(self, board)
+    setup_players
+  end
+
+  def setup_players
+    @players = [
+                 HumanPlayer.new(:black, self, display, board),
+                 HumanPlayer.new(:red, self, display, board)
+                ]
   end
 
   def play
     until over?
-      display
+      display.render
       execute_move
-      switch_player!
+      switch_players!
     end
     display
     puts "#{board.loser.color.to_s.capitalize} has lost!"
@@ -27,7 +31,7 @@ class CheckersGame
   def execute_move
     loop do
       break if current_player.make_move
-      display
+      display.render
     end
   end
 
@@ -43,21 +47,13 @@ class CheckersGame
     @players.last
   end
 
-  def switch_player!
+  def switch_players!
     @players.reverse!
-  end
-
-  def display
-    system('clear')
-    board.display
-    puts "#{current_player.color.to_s.capitalize}'s turn"
   end
 
 end
 
 if __FILE__ == $PROGRAM_NAME
-  player1 = HumanPlayer.new(:red)
-  player2 = HumanPlayer.new(:black)
-  game = CheckersGame.new([player1, player2])
+  game = CheckersGame.new
   game.play
 end
