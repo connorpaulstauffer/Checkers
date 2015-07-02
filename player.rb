@@ -1,22 +1,24 @@
+require 'io/console'
+
 class HumanPlayer
   attr_reader :color
+  attr_accessor :board
 
-  def initialize(color, game)
+  def initialize(color)
     @color = color
-    @game = game
   end
 
   def make_move
     action = $stdin.getch
     case action
     when "w"
-      game.board.cursor_up
+      board.cursor_up
     when "a"
-      game.board.cursor_left
+      board.cursor_left
     when "d"
-      game.board.cursor_right
+      board.cursor_right
     when "s"
-      game.board.cursor_down
+      board.cursor_down
     else
       false
     end

@@ -9,6 +9,18 @@ class Board
     @cursor_pos = cursor_pos
   end
 
+  def perform_slide(sequence)
+
+  end
+
+  def perform_jump(sequence)
+
+  end
+
+  def valid_pos?(pos)
+    pos.first.between?(0, 7) && pos.last.between?(0, 7)
+  end
+
   def setup_grid(grid)
     if grid.nil?
       build_grid
@@ -30,7 +42,7 @@ class Board
 
   def piece_row(row, color)
     (0..7).map do |col|
-      (col + row) % 2 == 0 ? Piece.new(color, [row, col]) : EmptySquare.new
+      (col + row) % 2 == 0 ? Piece.new(color, [row, col], self) : EmptySquare.new
     end
   end
 
@@ -47,10 +59,12 @@ class Board
       row.map.with_index do |el, c_idx|
         if [r_idx, c_idx] == cursor_pos
           el.to_s.colorize(background: :light_cyan)
+        elsif cursor_pos && self[*cursor_pos].valid_moves.include?([r_idx, c_idx])
+          el.to_s.colorize(background: :green)
         elsif (r_idx + c_idx) % 2 == 0
-          el.to_s.colorize(background: :white)
-        else
           el.to_s.colorize(background: :light_black)
+        else
+          el.to_s.colorize(background: :white)
         end
       end.join("")
     end.join("\n")
