@@ -2,7 +2,8 @@ require 'colorize'
 require 'byebug'
 
 class Piece
-  attr_reader :color, :pos, :board
+  attr_reader :color, :board
+  attr_accessor :pos
 
   def initialize(color, pos, board, kinged = false)
     @color = color
@@ -17,15 +18,24 @@ class Piece
 
   def valid_slides
     diffs = diffs_on_board(slide_diffs)
-    diffs.map do |r_change, c_change|
+    diffs.map! do |r_change, c_change|
       [pos.first + r_change, pos.last + c_change]
     end
+    diffs.select { |row, col| board[row, col].empty? }
   end
 
   def valid_jumps
     diffs = diffs_on_board(jump_diffs)
-    diffs.map do |r_change, c_change|
+    diffs.select! do |row_change, col_change|
+      half_row_change = row_change  / row_change.abs
+      half_col_change = col_change / col_change.abs
+      board[pos.first + half_row_change, pos.last + half_col_change].color == other_color
+    end
+    diffs.map! do |r_change, c_change|
       [pos.first + r_change, pos.last + c_change]
+    end
+    diffs.select do |row, col|
+      board[row, col].empty?
     end
   end
 
@@ -47,6 +57,10 @@ class Piece
     end
   end
 
+  def other_color
+    (color == :red) ? :black : :red
+  end
+
   def king?
     @kinged
   end
@@ -60,7 +74,16 @@ class Piece
   end
 
   def to_s
-    (color == :red) ? " #{"\u25C9".red} " : " #{"\u25C9".black} "
+    if king?
+      (color == :red) ? " #{"\u265A".red} " : " #{"\u265A".black} "
+    else
+      (color == :red) ? " #{"\u25C9".red} " : " #{"\u25C9".black} "
+    end
+  end
+
+  def king_me
+    @kinged = true
+    puts "kinged"
   end
 
 end
@@ -81,6 +104,10 @@ class EmptySquare
 
   def valid_moves
     []
+  end
+
+  def color
+    nil
   end
 
 end
