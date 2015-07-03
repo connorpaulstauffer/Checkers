@@ -12,35 +12,37 @@ class Piece
     @board = board
   end
 
-  def dup(new_board)
-    Piece.new(color, pos.dup, new_board, king?)
-  end
-
   def valid_moves
     valid_slides + valid_jumps
   end
 
   def valid_slides
     diffs = diffs_on_board(slide_diffs)
-    diffs.map! do |r_change, c_change|
-      [pos.first + r_change, pos.last + c_change]
-    end
-    diffs.select { |row, col| board[row, col].empty? }
+    moves = map_to_moves(diffs)
+    moves_to_empty(moves)
   end
 
   def valid_jumps
     diffs = diffs_on_board(jump_diffs)
-    diffs.select! do |row_change, col_change|
-      half_row_change = row_change  / row_change.abs
-      half_col_change = col_change / col_change.abs
-      board[pos.first + half_row_change, pos.last + half_col_change].color == other_color
+    diffs = jumps_over_enemy(diffs)
+    moves = map_to_moves(diffs)
+    moves_to_empty(moves)
+  end
+
+  def jumps_over_enemy(diffs)
+    diffs.select do |r_dx, c_dx|
+      half_r_dx = r_dx  / r_dx.abs
+      half_c_dx = c_dx / c_dx.abs
+      board[pos.first + half_r_dx, pos.last + half_c_dx].color == other_color
     end
-    diffs.map! do |r_change, c_change|
-      [pos.first + r_change, pos.last + c_change]
-    end
-    diffs.select do |row, col|
-      board[row, col].empty?
-    end
+  end
+
+  def map_to_moves(diffs)
+    diffs.map { |r_dx, c_dx| [pos.first + r_dx, pos.last + c_dx] }
+  end
+
+  def moves_to_empty(moves)
+    moves.select { |row, col| board[row, col].empty? }
   end
 
   def slide_diffs
@@ -61,6 +63,12 @@ class Piece
     end
   end
 
+  def valid_jumps_from(start_pos)
+    new_board = board.dup
+    new_board.move!(pos, start_pos)
+    new_board[*start_pos].valid_jumps
+  end
+
   def other_color
     (color == :red) ? :black : :red
   end
@@ -77,6 +85,10 @@ class Piece
     true
   end
 
+  def king_me
+    @kinged = true
+  end
+
   def to_s
     if king?
       (color == :red) ? " #{"\u265A".red} " : " #{"\u265A".black} "
@@ -85,8 +97,8 @@ class Piece
     end
   end
 
-  def king_me
-    @kinged = true
+  def dup(new_board)
+    Piece.new(color, pos.dup, new_board, king?)
   end
 
 end

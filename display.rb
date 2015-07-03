@@ -27,9 +27,9 @@ class Display
       row.map.with_index do |el, c_idx|
         if [r_idx, c_idx] == cursor_pos
           el.to_s.colorize(background: :light_cyan)
-        # elsif just_jumped? && board[*game.current_player.sequence.last].valid_jumps.include?([r_idx, c_idx])
-        #   el.to_s.colorize(background: :green)
-        elsif selected_pos && board[*selected_pos].valid_moves.include?([r_idx, c_idx])
+        elsif just_jumped? && board[*game.current_player.sequence[-2]].valid_jumps_from(game.current_player.sequence[-1]).include?([r_idx, c_idx])
+          el.to_s.colorize(background: :green)
+        elsif game.current_player.sequence.length < 2 && selected_pos && board[*selected_pos].valid_moves.include?([r_idx, c_idx])
           el.to_s.colorize(background: :green)
         elsif !selected_pos && cursor_pos && board[*cursor_pos].valid_moves.include?([r_idx, c_idx]) &&
               board[*cursor_pos].color == game.current_player.color
@@ -43,10 +43,12 @@ class Display
     end.join("\n")
   end
 
-  # def just_jumped?
-  #   sequence = game.current_player.sequence
-  #   sequence.length > 1 && board[*sequence[-2]].valid_jumps.include?(sequence[-1])
-  # end
+  def just_jumped?
+    sequence = game.current_player.sequence
+    return false if sequence.length < 2
+    return false if board[*sequence[-2]].empty?
+    board[*sequence[-2]].valid_jumps.include?(sequence[-1])
+  end
 
   def set_selected_pos
     @selected_pos = @cursor_pos if board[*cursor_pos].color == game.current_player.color
