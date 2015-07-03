@@ -12,6 +12,10 @@ class Piece
     @board = board
   end
 
+  def dup(new_board)
+    Piece.new(color, pos.dup, new_board, king?)
+  end
+
   def valid_moves
     valid_slides + valid_jumps
   end
@@ -83,12 +87,15 @@ class Piece
 
   def king_me
     @kinged = true
-    puts "kinged"
   end
 
 end
 
 class EmptySquare
+
+  def dup(new_board)
+    EmptySquare.new
+  end
 
   def empty?
     true

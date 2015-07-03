@@ -3,19 +3,13 @@ require_relative 'player'
 require_relative 'display'
 
 class CheckersGame
-  attr_reader :board, :players, :display
+  attr_reader :board, :players, :display, :move_sequence
 
   def initialize
     @board = Board.new(self)
     @display = Display.new(self, board)
+    @move_sequence = []
     setup_players
-  end
-
-  def setup_players
-    @players = [
-                 HumanPlayer.new(:black, self, display, board),
-                 HumanPlayer.new(:red, self, display, board)
-                ]
   end
 
   def play
@@ -24,14 +18,14 @@ class CheckersGame
       execute_move
       switch_players!
     end
-    display
-    puts "#{board.loser.color.to_s.capitalize} has lost!"
+    display.render
+    puts "#{other_player.color.to_s.capitalize} has won!"
   end
 
   def execute_move
     loop do
-      break if current_player.make_move
-      display.render
+      break if current_player.make_move_sequence
+
     end
   end
 
@@ -49,6 +43,13 @@ class CheckersGame
 
   def switch_players!
     @players.reverse!
+  end
+
+  def setup_players
+    @players = [
+                 HumanPlayer.new(:black, self, display, board),
+                 HumanPlayer.new(:red, self, display, board)
+                ]
   end
 
 end

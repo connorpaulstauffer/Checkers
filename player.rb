@@ -1,7 +1,7 @@
 require 'io/console'
 
 class HumanPlayer
-  attr_reader :color
+  attr_reader :color, :sequence
   attr_accessor :board, :game, :display
 
   def initialize(color, game, display, board)
@@ -9,20 +9,29 @@ class HumanPlayer
     @game = game
     @display = display
     @board = board
+    @sequence = []
   end
 
-  def make_move
-    input = process_input
-    if input == :jump && board[*display.cursor_pos].valid_jumps.length > 0
+  def make_move_sequence
+    loop do
+      input = get_input
+      if input == :enter
+        if @sequence.last == display.cursor_pos
+          valid = board.move(@sequence)
+          @sequence = []
+          display.reset_selected_pos
+          return true if valid
+        else
+          @sequence << display.cursor_pos
+          display.set_selected_pos
+        end
+      end
       display.render
-      display.set_selected_pos
-      make_move
-    else
-      return input
     end
   end
 
-  def process_input
+
+  def get_input
     action = $stdin.getch
     case action
     when "q"
@@ -36,15 +45,7 @@ class HumanPlayer
     when "s"
       display.cursor_down
     when "\r"
-      if display.selected_pos.nil?
-        display.set_selected_pos
-      else
-        move = board.move(display.selected_pos, display.cursor_pos)
-        display.reset_selected_pos
-        return move
-      end
-    else
-      false
+      return :enter
     end
     false
   end

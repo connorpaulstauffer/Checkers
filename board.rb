@@ -1,23 +1,58 @@
 require_relative 'piece'
+require 'byebug'
 
 class Board
 
-  attr_reader :grid, :game
+  attr_reader :game
+  attr_accessor :grid
 
   def initialize(game = nil, grid = nil, cursor_pos = [0, 0])
     @game = game
     setup_grid(grid)
   end
 
-  def move(start_pos, end_pos)
-    return false unless self[*start_pos].color == current_player.color
+  def move(sequence)
+    return false unless self[*sequence.first].color == current_player.color
+    if sequence.length > 2
+      handle_sequence(sequence)
+    else
+      handle_single_move(sequence.first, sequence.last)
+    end
+  end
+
+  def handle_sequence(sequence)
+    if sequence_valid?(sequence)
+      move_list(sequence).each do |start_pos, end_pos|
+        puts "#{start_pos} #{end_pos}"
+        puts "#{self[*start_pos]} ${self[*end_pos]}"
+        handle_single_move(start_pos, end_pos)
+        puts "#{start_pos} #{end_pos}"
+        puts "#{self[*start_pos]} ${self[*end_pos]}"
+      end
+      true
+    else
+      false
+    end
+  end
+
+  def sequence_valid?(sequence)
+    new_board = self.dup
+    new_board.move_list(sequence).none? do |start_pos, end_pos|
+      new_board.handle_single_move(start_pos, end_pos) == false
+    end
+  end
+
+  def move_list(sequence)
+    return [[sequence.first, sequence.last]] if sequence.length == 2
+    [[sequence[0], sequence[1]]] + move_list(sequence.drop(1))
+  end
+
+  def handle_single_move(start_pos, end_pos)
     if self[*start_pos].valid_slides.include?(end_pos)
       move!(start_pos, end_pos)
-      :slide
     elsif self[*start_pos].valid_jumps.include?(end_pos)
       self[*between(start_pos, end_pos)] = EmptySquare.new
       move!(start_pos, end_pos)
-      :jump
     else
       false
     end
@@ -95,6 +130,12 @@ class Board
 
   def inspect
     nil
+  end
+
+  def dup
+    new_board = Board.new(nil, [])
+    new_board.grid = grid.map { |row| row.map { |el| el.dup(new_board) } }
+    new_board
   end
 
   protected
