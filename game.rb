@@ -7,7 +7,7 @@ class CheckersGame
 
   def initialize
     @board = Board.new(self)
-    @display = Display.new(self, board)
+    @display = Display.new(self, board, [0, 0], true)
     @move_sequence = []
     setup_players
   end
@@ -47,9 +47,9 @@ class CheckersGame
 
   def setup_players
     @players = [
-                 HumanPlayer.new(:black, self, display, board),
-                 HumanPlayer.new(:red, self, display, board)
-                ]
+      HumanPlayer.new(:black, self, display, board),
+      HumanPlayer.new(:red, self, display, board)
+    ]
   end
 
 end
